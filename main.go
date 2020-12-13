@@ -7,7 +7,6 @@ import (
 	"github.com/cpoile/livego/protocol/hls"
 	"github.com/cpoile/livego/protocol/httpflv"
 	"github.com/cpoile/livego/protocol/rtmp"
-	"github.com/cpoile/livego/setup"
 	"net"
 	"path"
 	"runtime"
@@ -93,5 +92,5 @@ func main() {
 
 	api.StartAPI(stream)
 
-	setup.StartRtmp(stream, nil)
+	rtmp.StartRtmp(stream, nil)
 }
