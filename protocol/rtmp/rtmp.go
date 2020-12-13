@@ -3,19 +3,19 @@ package rtmp
 import "C"
 import (
 	"fmt"
-	"github.com/gwuhaolin/livego/protocol/hls"
+	"github.com/cpoile/livego/protocol/hls"
 	"net"
 	"net/url"
 	"reflect"
 	"strings"
 	"time"
 
-	"github.com/gwuhaolin/livego/utils/uid"
+	"github.com/cpoile/livego/utils/uid"
 
-	"github.com/gwuhaolin/livego/av"
-	"github.com/gwuhaolin/livego/configure"
-	"github.com/gwuhaolin/livego/container/flv"
-	"github.com/gwuhaolin/livego/protocol/rtmp/core"
+	"github.com/cpoile/livego/av"
+	"github.com/cpoile/livego/configure"
+	"github.com/cpoile/livego/container/flv"
+	"github.com/cpoile/livego/protocol/rtmp/core"
 
 	log "github.com/sirupsen/logrus"
 )

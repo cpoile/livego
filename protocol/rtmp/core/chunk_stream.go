@@ -4,8 +4,8 @@ import (
 	"encoding/binary"
 	"fmt"
 
-	"github.com/gwuhaolin/livego/av"
-	"github.com/gwuhaolin/livego/utils/pool"
+	"github.com/cpoile/livego/av"
+	"github.com/cpoile/livego/utils/pool"
 )
 
 type ChunkStream struct {

@@ -6,9 +6,9 @@ import (
 	"sync"
 	"time"
 
-	"github.com/gwuhaolin/livego/av"
-	"github.com/gwuhaolin/livego/protocol/rtmp/cache"
-	"github.com/gwuhaolin/livego/protocol/rtmp/rtmprelay"
+	"github.com/cpoile/livego/av"
+	"github.com/cpoile/livego/protocol/rtmp/cache"
+	"github.com/cpoile/livego/protocol/rtmp/rtmprelay"
 
 	log "github.com/sirupsen/logrus"
 )

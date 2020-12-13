@@ -10,10 +10,10 @@ import (
 	"strings"
 	"time"
 
-	"github.com/gwuhaolin/livego/av"
-	"github.com/gwuhaolin/livego/protocol/amf"
-	"github.com/gwuhaolin/livego/utils/pio"
-	"github.com/gwuhaolin/livego/utils/uid"
+	"github.com/cpoile/livego/av"
+	"github.com/cpoile/livego/protocol/amf"
+	"github.com/cpoile/livego/utils/pio"
+	"github.com/cpoile/livego/utils/uid"
 	log "github.com/sirupsen/logrus"
 )
 
