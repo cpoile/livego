@@ -1,7 +1,9 @@
 package rtmp
 
+import "C"
 import (
 	"fmt"
+	"github.com/gwuhaolin/livego/protocol/hls"
 	"net"
 	"net/url"
 	"reflect"
@@ -63,6 +65,35 @@ func (c *Client) Dial(url string, method string) error {
 
 func (c *Client) GetHandle() av.Handler {
 	return c.handler
+}
+
+func StartRtmp(stream *RtmpStream, hlsServer *hls.Server) string {
+	rtmpAddr := configure.Config.GetString("rtmp_addr")
+
+	rtmpListen, err := net.Listen("tcp", rtmpAddr)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	var rtmpServer *Server
+
+	if hlsServer == nil {
+		rtmpServer = NewRtmpServer(stream, nil)
+		log.Info("HLS server disable....")
+	} else {
+		rtmpServer = NewRtmpServer(stream, hlsServer)
+		log.Info("HLS server enable....")
+	}
+
+	defer func() {
+		if r := recover(); r != nil {
+			log.Error("RTMP server panic: ", r)
+		}
+	}()
+	log.Info("RTMP Listen On ", rtmpAddr)
+	rtmpServer.Serve(rtmpListen)
+
+	return rtmpAddr
 }
 
 type Server struct {
@@ -133,6 +164,36 @@ func (s *Server) handleConn(conn *core.Conn) error {
 		if pushlist, ret := configure.GetStaticPushUrlList(appname); ret && (pushlist != nil) {
 			log.Debugf("GetStaticPushUrlList: %v", pushlist)
 		}
+
+		////avctx := avformat.AvformatAllocContext()
+		//codec := avcodec.AvcodecFindDecoder(avcodec.CodecId(avcodec.AV_CODEC_ID_AAC))
+		//ctx := codec.AvcodecAllocContext3()
+		//par := avcodec.AvCodecParameters{
+		//	codec_type: 1,
+		//	codec_id: avcodec.AV_CODEC_ID_AAC,
+		//	codec_tag: 0,
+		//	bit_rate: 128231,
+		//	bits_per_coded_sample: 0,
+		//	bits_per_raw_sample: 0,
+		//	profile: 1,
+		//	level: -99,
+		//	format: 8,
+		//	channel_layout: 4,
+		//	channels: 1,
+		//	sample_rate: 32000,
+		//	block_align: 0,
+		//	frame_size: 1024,
+		//	initial_padding: 0,
+		//	trailing_padding: 0,
+		//	seek_preroll: 0,
+		//}
+		//ctx.AvCodecParametersToContext(par)
+		//
+		//
+		//
+		////reader.CTX = avCTX
+		//reader.Codec = codec
+
 		reader := NewVirReader(connServer)
 		s.handler.HandleReader(reader)
 		log.Debugf("new publisher: %+v", reader.Info())
@@ -143,6 +204,10 @@ func (s *Server) handleConn(conn *core.Conn) error {
 			writer := s.getter.GetWriter(reader.Info())
 			s.handler.HandleWriter(writer)
 		}
+
+		// Setup and register the ffmpeg streamer
+		s.handler.HandleWriter(flv.GetNewFfmpegWriter(reader.Info()))
+
 		//FIXME: should flv should be configurable, not always on -gs
 		flvWriter := new(flv.FlvDvr)
 		s.handler.HandleWriter(flvWriter.GetWriter(reader.Info()))
@@ -360,6 +425,8 @@ type VirReader struct {
 	demuxer    *flv.Demuxer
 	conn       StreamReadWriteCloser
 	ReadBWInfo StaticsBW
+	//CTX        *avformat.Context
+	//Codec      *avcodec.Codec
 }
 
 func NewVirReader(conn StreamReadWriteCloser) *VirReader {
@@ -428,6 +495,15 @@ func (v *VirReader) Read(p *av.Packet) (err error) {
 
 	v.SaveStatics(p.StreamID, uint64(len(p.Data)), p.IsVideo)
 	v.demuxer.DemuxH(p)
+
+	if p.IsAudio {
+		//fmt.Printf("<><>
+		//audio packet len: %v\n, audioPacketHeader: %#+v\n", len(p.Data), p.Header.(av.AudioPacketHeader))
+		//fmt.Printf("<><> format %v, rate %v, size %v, type %v\n", p.Header.(av.AudioPacketHeader).SoundFormat(),
+		//	p.Header.(av.AudioPacketHeader).SoundRate(),
+		//	p.Header.(av.AudioPacketHeader).SoundSize(),
+		//	p.Header.(av.AudioPacketHeader).SoundType())
+	}
 	return err
 }
 

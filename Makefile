@@ -1,5 +1,6 @@
 GOCMD ?= go
 GOBUILD = $(GOCMD) build
+GOBUILDDEBUG = $(GOBUILD) -gcflags "all=-N -l"
 GOCLEAN = $(GOCMD) clean
 GOTEST = $(GOCMD) test
 GOGET = $(GOCMD) get
@@ -26,7 +27,11 @@ clean:
 	rm -f $(BINARY_UNIX)
 
 run: build
-	./$(BINARY_NAME)
+	./$(BINARY_NAME) --level debug
+
+debug:
+	$(GOBUILDDEBUG) -o $(BINARY_NAME) -v -ldflags="-X main.VERSION=$(TAG)"
+	dlv --listen=:2345 --headless=true --api-version=2 --accept-multiclient exec ./$(BINARY_NAME)
 
 build-linux:
 	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 $(GOBUILD) -o $(BINARY_UNIX) -v

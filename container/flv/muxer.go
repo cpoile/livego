@@ -130,9 +130,11 @@ func (writer *FLVWriter) Wait() {
 	}
 }
 
-func (writer *FLVWriter) Close(error) {
+func (writer *FLVWriter) Close(err error) {
 	writer.ctx.Close()
 	close(writer.closed)
+
+	log.Warnf("Closed FLVWriter %s with error: %v", writer.Info().Key, err)
 }
 
 func (writer *FLVWriter) Info() (ret av.Info) {

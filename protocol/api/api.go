@@ -43,9 +43,9 @@ type OperationChange struct {
 }
 
 type ClientInfo struct {
-	url              string
-	rtmpRemoteClient *rtmp.Client
-	rtmpLocalClient  *rtmp.Client
+	url string
+	//rtmpRemoteClient *rtmp.Client
+	//rtmpLocalClient  *rtmp.Client
 }
 
 type Server struct {
@@ -59,6 +59,30 @@ func NewServer(h av.Handler, rtmpAddr string) *Server {
 		handler:  h,
 		session:  make(map[string]*rtmprelay.RtmpRelay),
 		rtmpAddr: rtmpAddr,
+	}
+}
+
+func StartAPI(stream *rtmp.RtmpStream) {
+	rtmpAddr := configure.Config.GetString("rtmp_addr")
+	apiAddr := configure.Config.GetString("api_addr")
+
+	fmt.Printf("<><> apiAddr: %s\n", apiAddr)
+
+	if apiAddr != "" {
+		opListen, err := net.Listen("tcp", apiAddr)
+		if err != nil {
+			log.Fatal(err)
+		}
+		opServer := NewServer(stream, rtmpAddr)
+		go func() {
+			defer func() {
+				if r := recover(); r != nil {
+					log.Error("HTTP-API server panic: ", r)
+				}
+			}()
+			log.Info("HTTP-API listen On ", apiAddr)
+			opServer.Serve(opListen)
+		}()
 	}
 }
 
@@ -120,9 +144,9 @@ func (s *Server) Serve(l net.Listener) error {
 	mux.HandleFunc("/control/delete", func(w http.ResponseWriter, r *http.Request) {
 		s.handleDelete(w, r)
 	})
-	mux.HandleFunc("/stat/livestat", func(w http.ResponseWriter, r *http.Request) {
-		s.GetLiveStatics(w, r)
-	})
+	//mux.HandleFunc("/stat/livestat", func(w http.ResponseWriter, r *http.Request) {
+	//	s.GetLiveStatics(w, r)
+	//})
 	http.Serve(l, JWTMiddleware(mux))
 	return nil
 }
@@ -143,61 +167,61 @@ type streams struct {
 }
 
 //http://127.0.0.1:8090/stat/livestat
-func (server *Server) GetLiveStatics(w http.ResponseWriter, req *http.Request) {
-	res := &Response{
-		w:      w,
-		Data:   nil,
-		Status: 200,
-	}
-
-	defer res.SendJson()
-
-	rtmpStream := server.handler.(*rtmp.RtmpStream)
-	if rtmpStream == nil {
-		res.Status = 500
-		res.Data = "Get rtmp stream information error"
-		return
-	}
-
-	msgs := new(streams)
-
-	rtmpStream.GetStreams().Range(func(key, val interface{}) bool {
-		if s, ok := val.(*rtmp.Stream); ok {
-			if s.GetReader() != nil {
-				switch s.GetReader().(type) {
-				case *rtmp.VirReader:
-					v := s.GetReader().(*rtmp.VirReader)
-					msg := stream{key.(string), v.Info().URL, v.ReadBWInfo.StreamId, v.ReadBWInfo.VideoDatainBytes, v.ReadBWInfo.VideoSpeedInBytesperMS,
-						v.ReadBWInfo.AudioDatainBytes, v.ReadBWInfo.AudioSpeedInBytesperMS}
-					msgs.Publishers = append(msgs.Publishers, msg)
-				}
-			}
-		}
-		return true
-	})
-
-	rtmpStream.GetStreams().Range(func(key, val interface{}) bool {
-		ws := val.(*rtmp.Stream).GetWs()
-		ws.Range(func(k, v interface{}) bool {
-			if pw, ok := v.(*rtmp.PackWriterCloser); ok {
-				if pw.GetWriter() != nil {
-					switch pw.GetWriter().(type) {
-					case *rtmp.VirWriter:
-						v := pw.GetWriter().(*rtmp.VirWriter)
-						msg := stream{key.(string), v.Info().URL, v.WriteBWInfo.StreamId, v.WriteBWInfo.VideoDatainBytes, v.WriteBWInfo.VideoSpeedInBytesperMS,
-							v.WriteBWInfo.AudioDatainBytes, v.WriteBWInfo.AudioSpeedInBytesperMS}
-						msgs.Players = append(msgs.Players, msg)
-					}
-				}
-			}
-			return true
-		})
-		return true
-	})
-
-	//resp, _ := json.Marshal(msgs)
-	res.Data = msgs
-}
+//func (server *Server) GetLiveStatics(w http.ResponseWriter, req *http.Request) {
+//	res := &Response{
+//		w:      w,
+//		Data:   nil,
+//		Status: 200,
+//	}
+//
+//	defer res.SendJson()
+//
+//	rtmpStream := server.handler.(*rtmp.RtmpStream)
+//	if rtmpStream == nil {
+//		res.Status = 500
+//		res.Data = "Get rtmp stream information error"
+//		return
+//	}
+//
+//	msgs := new(streams)
+//
+//	rtmpStream.GetStreams().Range(func(key, val interface{}) bool {
+//		if s, ok := val.(*rtmp.Stream); ok {
+//			if s.GetReader() != nil {
+//				switch s.GetReader().(type) {
+//				case *rtmp.VirReader:
+//					v := s.GetReader().(*rtmp.VirReader)
+//					msg := stream{key.(string), v.Info().URL, v.ReadBWInfo.StreamId, v.ReadBWInfo.VideoDatainBytes, v.ReadBWInfo.VideoSpeedInBytesperMS,
+//						v.ReadBWInfo.AudioDatainBytes, v.ReadBWInfo.AudioSpeedInBytesperMS}
+//					msgs.Publishers = append(msgs.Publishers, msg)
+//				}
+//			}
+//		}
+//		return true
+//	})
+//
+//	rtmpStream.GetStreams().Range(func(key, val interface{}) bool {
+//		ws := val.(*rtmp.Stream).GetWs()
+//		ws.Range(func(k, v interface{}) bool {
+//			if pw, ok := v.(*rtmp.PackWriterCloser); ok {
+//				if pw.GetWriter() != nil {
+//					switch pw.GetWriter().(type) {
+//					case *rtmp.VirWriter:
+//						v := pw.GetWriter().(*rtmp.VirWriter)
+//						msg := stream{key.(string), v.Info().URL, v.WriteBWInfo.StreamId, v.WriteBWInfo.VideoDatainBytes, v.WriteBWInfo.VideoSpeedInBytesperMS,
+//							v.WriteBWInfo.AudioDatainBytes, v.WriteBWInfo.AudioSpeedInBytesperMS}
+//						msgs.Players = append(msgs.Players, msg)
+//					}
+//				}
+//			}
+//			return true
+//		})
+//		return true
+//	})
+//
+//	//resp, _ := json.Marshal(msgs)
+//	res.Data = msgs
+//}
 
 //http://127.0.0.1:8090/control/pull?&oper=start&app=live&name=123456&url=rtmp://192.168.16.136/live/123456
 func (s *Server) handlePull(w http.ResponseWriter, req *http.Request) {

@@ -64,6 +64,7 @@ func (rs *RtmpStream) HandleWriter(w av.WriteCloser) {
 		s = NewStream()
 		rs.streams.Store(info.Key, s)
 		s.info = info
+		//s.AddWriter(w)
 	} else {
 		s = item.(*Stream)
 		s.AddWriter(w)

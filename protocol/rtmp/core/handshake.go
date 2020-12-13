@@ -157,9 +157,16 @@ func (conn *Conn) HandshakeServer() (err error) {
 
 	// < C0C1
 	conn.Conn.SetDeadline(time.Now().Add(timeout))
+	//log.Debugf("<><> C0C1 bfr: %+v\n", C0C1)
 	if _, err = io.ReadFull(conn.rw, C0C1); err != nil {
+		//log.Debugf("<><> C0C1 aft: %+v\n", C0C1)
+		//log.Debugf("<><> as string: %s\n", C0C1)
+
 		return
 	}
+	//log.Debugf("<><> C0C1 aft: %+v\n", C0C1)
+	//log.Debugf("<><> as string: %s\n", C0C1)
+
 	conn.Conn.SetDeadline(time.Now().Add(timeout))
 	if C0[0] != 3 {
 		err = fmt.Errorf("rtmp: handshake version=%d invalid", C0[0])

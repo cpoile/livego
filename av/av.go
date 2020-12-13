@@ -75,6 +75,9 @@ type PacketHeader interface {
 type AudioPacketHeader interface {
 	PacketHeader
 	SoundFormat() uint8
+	SoundRate() uint8
+	SoundSize() uint8
+	SoundType() uint8
 	AACPacketType() uint8
 }
 

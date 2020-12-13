@@ -110,6 +110,18 @@ func (tag *Tag) SoundFormat() uint8 {
 	return tag.mediat.soundFormat
 }
 
+func (tag *Tag) SoundRate() uint8 {
+	return tag.mediat.soundRate
+}
+
+func (tag *Tag) SoundSize() uint8 {
+	return tag.mediat.soundSize
+}
+
+func (tag *Tag) SoundType() uint8 {
+	return tag.mediat.soundType
+}
+
 func (tag *Tag) AACPacketType() uint8 {
 	return tag.mediat.aacPacketType
 }
