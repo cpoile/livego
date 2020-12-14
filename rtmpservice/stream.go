@@ -1,4 +1,4 @@
-package rtmp
+package rtmpservice
 
 import (
 	"fmt"
@@ -7,8 +7,8 @@ import (
 	"time"
 
 	"github.com/cpoile/livego/av"
-	"github.com/cpoile/livego/protocol/rtmp/cache"
-	"github.com/cpoile/livego/protocol/rtmp/rtmprelay"
+	"github.com/cpoile/livego/rtmp/cache"
+	"github.com/cpoile/livego/rtmp/rtmprelay"
 
 	log "github.com/sirupsen/logrus"
 )

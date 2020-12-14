@@ -7,7 +7,7 @@ import (
 	"io"
 
 	"github.com/cpoile/livego/protocol/amf"
-	"github.com/cpoile/livego/protocol/rtmp/core"
+	"github.com/cpoile/livego/rtmp/core"
 
 	log "github.com/sirupsen/logrus"
 )

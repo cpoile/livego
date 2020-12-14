@@ -3,13 +3,13 @@ package api
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/cpoile/livego/rtmpservice"
 	"net"
 	"net/http"
 
 	"github.com/cpoile/livego/av"
 	"github.com/cpoile/livego/configure"
-	"github.com/cpoile/livego/protocol/rtmp"
-	"github.com/cpoile/livego/protocol/rtmp/rtmprelay"
+	"github.com/cpoile/livego/rtmp/rtmprelay"
 
 	jwtmiddleware "github.com/auth0/go-jwt-middleware"
 	"github.com/dgrijalva/jwt-go"
@@ -62,7 +62,7 @@ func NewServer(h av.Handler, rtmpAddr string) *Server {
 	}
 }
 
-func StartAPI(stream *rtmp.RtmpStream) {
+func StartAPI(stream *rtmpservice.RtmpStream) {
 	rtmpAddr := configure.Config.GetString("rtmp_addr")
 	apiAddr := configure.Config.GetString("api_addr")
 

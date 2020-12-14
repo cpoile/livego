@@ -1,9 +1,8 @@
-package rtmp
+package rtmpservice
 
 import "C"
 import (
 	"fmt"
-	"github.com/cpoile/livego/protocol/hls"
 	"net"
 	"net/url"
 	"reflect"
@@ -15,7 +14,7 @@ import (
 	"github.com/cpoile/livego/av"
 	"github.com/cpoile/livego/configure"
 	"github.com/cpoile/livego/container/flv"
-	"github.com/cpoile/livego/protocol/rtmp/core"
+	"github.com/cpoile/livego/rtmp/core"
 
 	log "github.com/sirupsen/logrus"
 )
@@ -67,44 +66,15 @@ func (c *Client) GetHandle() av.Handler {
 	return c.handler
 }
 
-func StartRtmp(stream *RtmpStream, hlsServer *hls.Server) string {
-	rtmpAddr := configure.Config.GetString("rtmp_addr")
-
-	rtmpListen, err := net.Listen("tcp", rtmpAddr)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	var rtmpServer *Server
-
-	if hlsServer == nil {
-		rtmpServer = NewRtmpServer(stream, nil)
-		log.Info("HLS server disable....")
-	} else {
-		rtmpServer = NewRtmpServer(stream, hlsServer)
-		log.Info("HLS server enable....")
-	}
-
-	defer func() {
-		if r := recover(); r != nil {
-			log.Error("RTMP server panic: ", r)
-		}
-	}()
-	log.Info("RTMP Listen On ", rtmpAddr)
-	rtmpServer.Serve(rtmpListen)
-
-	return rtmpAddr
-}
-
 type Server struct {
 	handler av.Handler
 	getter  av.GetWriter
 }
 
-func NewRtmpServer(h av.Handler, getter av.GetWriter) *Server {
+func NewRtmpServer(h av.Handler) *Server {
 	return &Server{
 		handler: h,
-		getter:  getter,
+		getter:  nil,
 	}
 }
 

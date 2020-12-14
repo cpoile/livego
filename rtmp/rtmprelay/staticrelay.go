@@ -6,7 +6,7 @@ import (
 
 	"github.com/cpoile/livego/av"
 	"github.com/cpoile/livego/configure"
-	"github.com/cpoile/livego/protocol/rtmp/core"
+	"github.com/cpoile/livego/rtmp/core"
 
 	log "github.com/sirupsen/logrus"
 )

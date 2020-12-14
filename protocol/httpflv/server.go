@@ -2,13 +2,12 @@ package httpflv
 
 import (
 	"encoding/json"
+	"github.com/cpoile/livego/rtmpservice"
 	"net"
 	"net/http"
 	"strings"
 
 	"github.com/cpoile/livego/av"
-	"github.com/cpoile/livego/protocol/rtmp"
-
 	log "github.com/sirupsen/logrus"
 )
 
@@ -46,14 +45,14 @@ func (server *Server) Serve(l net.Listener) error {
 
 // 获取发布和播放器的信息
 func (server *Server) getStreams(w http.ResponseWriter, r *http.Request) *streams {
-	rtmpStream := server.handler.(*rtmp.RtmpStream)
+	rtmpStream := server.handler.(*rtmpservice.RtmpStream)
 	if rtmpStream == nil {
 		return nil
 	}
 	msgs := new(streams)
 
 	rtmpStream.GetStreams().Range(func(key, val interface{}) bool {
-		if s, ok := val.(*rtmp.Stream); ok {
+		if s, ok := val.(*rtmpservice.Stream); ok {
 			if s.GetReader() != nil {
 				msg := stream{key.(string), s.GetReader().Info().UID}
 				msgs.Publishers = append(msgs.Publishers, msg)
@@ -63,10 +62,10 @@ func (server *Server) getStreams(w http.ResponseWriter, r *http.Request) *stream
 	})
 
 	rtmpStream.GetStreams().Range(func(key, val interface{}) bool {
-		ws := val.(*rtmp.Stream).GetWs()
+		ws := val.(*rtmpservice.Stream).GetWs()
 
 		ws.Range(func(k, v interface{}) bool {
-			if pw, ok := v.(*rtmp.PackWriterCloser); ok {
+			if pw, ok := v.(*rtmpservice.PackWriterCloser); ok {
 				if pw.GetWriter() != nil {
 					msg := stream{key.(string), pw.GetWriter().Info().UID}
 					msgs.Players = append(msgs.Players, msg)

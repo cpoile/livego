@@ -6,7 +6,8 @@ import (
 	"github.com/cpoile/livego/protocol/api"
 	"github.com/cpoile/livego/protocol/hls"
 	"github.com/cpoile/livego/protocol/httpflv"
-	"github.com/cpoile/livego/protocol/rtmp"
+	"github.com/cpoile/livego/rtmpservice"
+	"github.com/cpoile/livego/startup"
 	"net"
 	"path"
 	"runtime"
@@ -37,7 +38,7 @@ func startHls() *hls.Server {
 	return hlsServer
 }
 
-func startHTTPFlv(stream *rtmp.RtmpStream) {
+func startHTTPFlv(stream *rtmpservice.RtmpStream) {
 	httpflvAddr := configure.Config.GetString("httpflv_addr")
 
 	flvListen, err := net.Listen("tcp", httpflvAddr)
@@ -86,11 +87,11 @@ func main() {
 
 	//avformat.AvRegisterAll()
 
-	stream := rtmp.NewRtmpStream()
+	stream := rtmpservice.NewRtmpStream()
 	//hlsServer := startHls()
 	//startHTTPFlv(stream)
 
 	api.StartAPI(stream)
 
-	rtmp.StartRtmp(stream, nil)
+	startup.MyStartRtmp(stream)
 }
